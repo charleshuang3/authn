@@ -1,0 +1,17 @@
+port: 8081
+gin_mode: debug
+db:
+  dsn: host=localhost user=user password=pass dbname=db port=9920 sslmode=disable # filepath will use sqlite, empty will use in memory sqlite
+  log_level: 4 # Info
+oidc:
+  title: Test Auth Server
+  issuer: http://127.0.0.1:8081/oauth2
+  private_key_pem: |
+    -----BEGIN RSA PRIVATE KEY-----
+    MIIEowIBAAK...
+    -----END RSA PRIVATE KEY-----
+  sso:
+    google:
+      client_id: your-google-login-client-id
+      client_secret: your-google-login-client-secret
+      redirect_uri: http://127.0.0.1:8081/sso/google/callback
