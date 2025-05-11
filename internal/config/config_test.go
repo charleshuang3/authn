@@ -27,13 +27,20 @@ func TestLoadConfigSuccess(t *testing.T) {
 			Title:         "Test OIDC Provider",
 			PrivateKeyPEM: "testprivatekeypem",
 			Issuer:        "http://localhost:8080",
+			SSO: oidc.SSOConfig{
+				Google: oidc.GoogleLogin{
+					ClientID:     "testclientid",
+					ClientSecret: "testclientsecret",
+					RedirectURI:  "http://localhost:8080/callback",
+				},
+			},
 		},
 		DB: gormw.Config{
 			DSN:                  "testdsn",
 			DisableAutomaticPing: false,
 			MaxOpenConns:         10,
 			MaxIdleConns:         5,
-			LogLevel:             2, // gormlog.Info
+			LogLevel:             2, // gormlog.Error
 		},
 	}
 
