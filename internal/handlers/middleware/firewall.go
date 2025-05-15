@@ -45,7 +45,7 @@ type FirewallConfig struct {
 }
 
 var (
-	supportedProviders = []string{"ros", "opn", "pf"}
+	supportedProviders = []string{"none", "ros", "opn", "pf"}
 )
 
 const (
@@ -61,20 +61,22 @@ func (c *FirewallConfig) Validate() {
 		logger.Fatal().Msgf("Provider %s is not supported", c.Provider)
 	}
 
-	if c.ProviderIP == "" {
-		logger.Fatal().Msg("ProviderIP is missing")
-	}
+	if c.Provider != "none" {
+		if c.ProviderIP == "" {
+			logger.Fatal().Msg("ProviderIP is missing")
+		}
 
-	if c.ProviderUser == "" {
-		logger.Fatal().Msg("ProviderUser is missing")
-	}
+		if c.ProviderUser == "" {
+			logger.Fatal().Msg("ProviderUser is missing")
+		}
 
-	if c.ProviderPassword == "" {
-		logger.Fatal().Msg("ProviderPassword is missing")
-	}
+		if c.ProviderPassword == "" {
+			logger.Fatal().Msg("ProviderPassword is missing")
+		}
 
-	if c.Provider == "opn" && c.ListUUID == "" {
-		logger.Fatal().Msg("ListUUID is missing")
+		if c.Provider == "opn" && c.ListUUID == "" {
+			logger.Fatal().Msg("ListUUID is missing")
+		}
 	}
 
 	if c.CityDBFile == "" {
@@ -127,7 +129,7 @@ func NewFirewallMiddleware(conf *FirewallConfig) *FirewallMiddleware {
 		firewallProvider = opn.New(
 			conf.ProviderIP, conf.ProviderUser, conf.ProviderPassword, conf.ListUUID)
 	default:
-		logger.Fatal().Msgf("firewall provider %q does not support yet", conf.Provider)
+		// keep firewallProvider nil which means no block on firewall
 	}
 
 	var fwlogger firewall.ILogger
