@@ -1,9 +1,13 @@
 package main
 
 import (
+	"context"
 	"flag"
 	"fmt"
+	"net/http"
 	"os"
+	"os/signal"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-co-op/gocron/v2"
@@ -60,9 +64,39 @@ func main() {
 	statisfiles.RegisterHandlers(router.Group("/"))
 
 	// Start server
-	addr := fmt.Sprintf(":%d", cfg.Port)
-	log.Info().Msgf("Starting server on %s", addr)
-	if err := router.Run(addr); err != nil {
-		log.Fatal().Err(err).Msg("Failed to start server")
+	srv := &http.Server{
+		Addr: fmt.Sprintf(":%d", cfg.Port),
+		// Good practice to set timeouts to avoid Slowloris attacks.
+		WriteTimeout: time.Second * 15,
+		ReadTimeout:  time.Second * 15,
+		IdleTimeout:  time.Second * 60,
+		Handler:      router,
 	}
+
+	// Run our server in a goroutine so that it doesn't block.
+	go func() {
+		log.Printf("start server at %q", srv.Addr)
+		if err := srv.ListenAndServe(); err != nil {
+			log.Fatal().Err(err).Msg("Failed to start server")
+		}
+	}()
+
+	c := make(chan os.Signal, 1)
+	// We'll accept graceful shutdowns when quit via SIGINT (Ctrl+C)
+	// SIGKILL, SIGQUIT or SIGTERM (Ctrl+/) will not be caught.
+	signal.Notify(c, os.Interrupt)
+
+	// Block until we receive our signal.
+	<-c
+
+	// Create a deadline to wait for.
+	wait := time.Second * 15
+	ctx, cancel := context.WithTimeout(context.Background(), wait)
+	defer cancel()
+	// Doesn't block if no connections, but will otherwise wait
+	// until the timeout deadline.
+	srv.Shutdown(ctx)
+
+	log.Info().Msg("shutting down")
+	os.Exit(0)
 }
