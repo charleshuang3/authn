@@ -9,6 +9,7 @@ import (
 	"gopkg.in/yaml.v2"
 
 	"github.com/charleshuang3/authn/internal/gormw"
+	"github.com/charleshuang3/authn/internal/handlers/middleware"
 	"github.com/charleshuang3/authn/internal/handlers/oidc"
 )
 
@@ -41,6 +42,27 @@ func TestLoadConfigSuccess(t *testing.T) {
 			MaxOpenConns:         10,
 			MaxIdleConns:         5,
 			LogLevel:             2, // gormlog.Error
+		},
+		Firewall: middleware.FirewallConfig{
+			Provider:         "ros",
+			ProviderIP:       "192.168.1.1",
+			ProviderUser:     "admin",
+			ProviderPassword: "password",
+			ListUUID:         "12345",
+			Whitelist:        []string{"192.168.1.1", "192.168.1.2"},
+			BanMinutes:       10,
+			Forgivable: middleware.ForgivableError{
+				DurationInMinute: 10,
+				Count:            3,
+			},
+
+			CityDBFile:        "/path/to/city.mmdb",
+			UpdatedCityDBFile: "/path/to/updated_city.mmdb",
+			ASNDBFile:         "/path/to/asn.mmdb",
+			UpdatedASNDBFile:  "/path/to/updated_asn.mmdb",
+
+			GoogleKeyFile:   "/path/to/key.json",
+			GoogleProjectID: "project-id",
 		},
 	}
 

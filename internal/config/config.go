@@ -7,6 +7,7 @@ import (
 	"gopkg.in/yaml.v2"
 
 	"github.com/charleshuang3/authn/internal/gormw"
+	"github.com/charleshuang3/authn/internal/handlers/middleware"
 	"github.com/charleshuang3/authn/internal/handlers/oidc"
 )
 
@@ -15,10 +16,11 @@ var (
 )
 
 type Config struct {
-	Port    uint                    `yaml:"port"`
-	GinMode string                  `yaml:"gin_mode"`
-	OIDC    oidc.OIDCProviderConfig `yaml:"oidc"`
-	DB      gormw.Config            `yaml:"db"`
+	Port     uint                      `yaml:"port"`
+	GinMode  string                    `yaml:"gin_mode"`
+	OIDC     oidc.OIDCProviderConfig   `yaml:"oidc"`
+	DB       gormw.Config              `yaml:"db"`
+	Firewall middleware.FirewallConfig `yaml:"firewall"`
 }
 
 func LoadConfig(path string) *Config {
@@ -50,4 +52,6 @@ func (c *Config) validate() {
 	}
 
 	c.OIDC.Validate()
+
+	c.Firewall.Validate()
 }
