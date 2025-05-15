@@ -11,6 +11,7 @@ import (
 
 	"github.com/charleshuang3/authn/internal/config"
 	"github.com/charleshuang3/authn/internal/gormw"
+	"github.com/charleshuang3/authn/internal/handlers/middleware"
 	"github.com/charleshuang3/authn/internal/handlers/oidc"
 	"github.com/charleshuang3/authn/internal/handlers/statisfiles"
 	"github.com/charleshuang3/authn/internal/storage"
@@ -47,6 +48,10 @@ func main() {
 	// Set up Gin router
 	gin.SetMode(cfg.GinMode)
 	router := gin.Default()
+
+	// add firewall middleware
+	fw := middleware.NewFirewallMiddleware(&cfg.Firewall)
+	router.Use(fw.Middleware())
 
 	// Register OIDC handlers
 	oidcProvider := oidc.NewOpenIDProvider(&cfg.OIDC, db)
