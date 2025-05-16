@@ -13,7 +13,7 @@ RUN go mod download
 COPY . .
 
 # Build the application
-RUN CGO_ENABLED=0 GOOS=linux go build -o authm ./cmd/authm/main.go
+RUN CGO_ENABLED=0 GOOS=linux go build -o authn ./cmd/authn/main.go
 
 # Stage 2: Create a minimal runtime image
 FROM alpine:3.21
@@ -24,7 +24,7 @@ WORKDIR /app
 RUN apk update && apk add --no-cache ca-certificates
 
 # Copy the binary from the builder stage
-COPY --from=builder /app/authm .
+COPY --from=builder /app/authn .
 
 # Command to run the executable
-CMD ["./authm"]
+CMD ["./authn"]
