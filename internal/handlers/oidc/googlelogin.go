@@ -25,14 +25,14 @@ type handleGoogleCallbackParams struct {
 func (o *OpenIDProvider) handleGoogleCallback(c *gin.Context) {
 	params := handleGoogleCallbackParams{}
 	if err := c.ShouldBind(&params); err != nil {
-		c.String(http.StatusBadRequest, "Missing required parameters")
+		responseErrorAndLogMaybeHack(c, http.StatusBadRequest, "Missing required parameters")
 		return
 	}
 
 	// 1. Check state in storage
 	authState, ok := o.authStateStorage.Get(params.State)
 	if !ok {
-		c.String(http.StatusBadRequest, "Invalid state")
+		responseErrorAndLogMaybeHack(c, http.StatusBadRequest, "Invalid state")
 		return
 	}
 	// Remove state after use to prevent replay attacks

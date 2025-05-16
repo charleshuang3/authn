@@ -29,14 +29,14 @@ type handleNotOIDCUserInfoResponse struct {
 func (o *OpenIDProvider) handleNotOIDCUserInfo(c *gin.Context) {
 	params := &handleNotOIDCUserInfoParams{}
 	if err := c.ShouldBind(params); err != nil {
-		c.String(http.StatusBadRequest, "Missing required parameters")
+		responseErrorAndLogMaybeHack(c, http.StatusBadRequest, "Missing required parameters")
 		return
 	}
 
 	cli, err := storage.GetClientByID(o.db, params.ClientID)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			c.String(http.StatusBadRequest, "Invalid client ID")
+			responseErrorAndLogMaybeHack(c, http.StatusBadRequest, "Invalid client ID")
 			return
 		}
 		logger.Error().Err(err).Msg("Database error during client lookup")
@@ -45,19 +45,19 @@ func (o *OpenIDProvider) handleNotOIDCUserInfo(c *gin.Context) {
 	}
 
 	if cli.Secret != params.ClientSecret {
-		c.String(http.StatusBadRequest, "Invalid client secret")
+		responseErrorAndLogMaybeHack(c, http.StatusBadRequest, "Invalid client secret")
 		return
 	}
 
 	if !cli.AllowHTTPBasicAuth {
-		c.String(http.StatusBadRequest, "Client does not allow HTTP basic auth")
+		responseErrorAndLogMaybeHack(c, http.StatusBadRequest, "Client does not allow HTTP basic auth")
 		return
 	}
 
 	user, err := storage.GetUserByUsername(o.db, params.Username)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			c.String(http.StatusBadRequest, "Invalid username")
+			responseErrorAndLogMaybeHack(c, http.StatusBadRequest, "Invalid username")
 			return
 		}
 		logger.Error().Err(err).Msg("Database error during user lookup")
@@ -66,7 +66,7 @@ func (o *OpenIDProvider) handleNotOIDCUserInfo(c *gin.Context) {
 	}
 
 	if !user.CheckPassword(params.Password) {
-		c.String(http.StatusBadRequest, "Invalid password")
+		responseErrorAndLogMaybeHack(c, http.StatusBadRequest, "Invalid password")
 		return
 	}
 

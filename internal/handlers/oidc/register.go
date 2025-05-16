@@ -34,14 +34,13 @@ type RegisterPageData struct {
 func (o *OpenIDProvider) registerPage(c *gin.Context) {
 	state := c.Query("state")
 	if state == "" {
-		c.String(http.StatusBadRequest, "Missing state parameter")
+		responseErrorAndLogMaybeHack(c, http.StatusBadRequest, "Missing state parameter")
 		return
 	}
 
 	authState, ok := o.authStateStorage.Get(state)
 	if !ok {
-		// This could happen if the state is expired or invalid
-		c.String(http.StatusBadRequest, "Invalid or expired state")
+		responseErrorAndLogMaybeHack(c, http.StatusBadRequest, "Invalid or expired state")
 		return
 	}
 
@@ -123,38 +122,38 @@ func (o *OpenIDProvider) handleUserRegister(c *gin.Context) {
 	params := &handleUserRegisterParams{}
 
 	if err := c.ShouldBind(params); err != nil {
-		c.String(http.StatusBadRequest, "Missing required parameters: "+err.Error())
+		responseErrorAndLogMaybeHack(c, http.StatusBadRequest, "Missing required parameters: "+err.Error())
 		return
 	}
 
 	// Validate Username
 	if !usernameRegex.MatchString(params.Username) {
-		c.String(http.StatusBadRequest, "Invalid username format. Must be 4-12 characters and contain only letters, numbers, hyphens, and underscores.")
+		responseErrorAndLogMaybeHack(c, http.StatusBadRequest, "Invalid username format. Must be 4-12 characters and contain only letters, numbers, hyphens, and underscores.")
 		return
 	}
 
 	// Validate Email
 	if err := checkmail.ValidateFormat(params.Email); err != nil {
-		c.String(http.StatusBadRequest, "Invalid email format.")
+		responseErrorAndLogMaybeHack(c, http.StatusBadRequest, "Invalid email format.")
 		return
 	}
 
 	// Validate Password
 	if err := validatePassword(params.Password); err != nil {
-		c.String(http.StatusBadRequest, err.Error())
+		responseErrorAndLogMaybeHack(c, http.StatusBadRequest, err.Error())
 		return
 	}
 
 	// Validate Invitation Code (not empty)
 	if strings.TrimSpace(params.InvitationCode) == "" {
-		c.String(http.StatusBadRequest, "Invitation code cannot be empty.")
+		responseErrorAndLogMaybeHack(c, http.StatusBadRequest, "Invitation code cannot be empty.")
 		return
 	}
 
 	// Check state in storage
 	authState, ok := o.authStateStorage.Get(params.State)
 	if !ok {
-		c.String(http.StatusBadRequest, "Invalid or expired state.")
+		responseErrorAndLogMaybeHack(c, http.StatusBadRequest, "Invalid or expired state.")
 		return
 	}
 	o.authStateStorage.Delete(params.State) // Remove state after use
@@ -163,7 +162,7 @@ func (o *OpenIDProvider) handleUserRegister(c *gin.Context) {
 	invitation, err := storage.GetInvitationByCode(o.db, params.InvitationCode)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			c.String(http.StatusBadRequest, "Invalid invitation code.")
+			responseErrorAndLogMaybeHack(c, http.StatusBadRequest, "Invalid invitation code.")
 			return
 		}
 		logger.Error().Err(err).Str("invitation_code", params.InvitationCode).Msg("Failed to get invitation code")

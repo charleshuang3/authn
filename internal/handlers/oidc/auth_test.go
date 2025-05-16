@@ -20,6 +20,9 @@ import (
 
 func setupTestProvider(t *testing.T) (*OpenIDProvider, *gormw.DB, *gin.Engine) {
 	t.Helper()
+
+	cleanedErrorMessage = false
+
 	database, err := gormw.Open(&gormw.Config{
 		LogLevel: gormlog.Silent,
 	})

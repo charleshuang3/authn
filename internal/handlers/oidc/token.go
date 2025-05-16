@@ -22,7 +22,7 @@ import (
 func (o *OpenIDProvider) handleToken(c *gin.Context) {
 	grantType := c.PostForm("grant_type")
 	if grantType == "" {
-		c.String(http.StatusBadRequest, "require form value grant_type")
+		responseErrorAndLogMaybeHack(c, http.StatusBadRequest, "require form value grant_type")
 		return
 	}
 
@@ -32,7 +32,7 @@ func (o *OpenIDProvider) handleToken(c *gin.Context) {
 	case "refresh_token":
 		o.handleTokenRefreshToken(c)
 	default:
-		c.String(http.StatusBadRequest, "Unsupported grant type")
+		responseErrorAndLogMaybeHack(c, http.StatusBadRequest, "Unsupported grant type")
 	}
 }
 
@@ -55,14 +55,14 @@ func (o *OpenIDProvider) handleTokenAuthorizationCode(c *gin.Context) {
 	params := &handleTokenAuthorizationCodeParams{}
 
 	if err := c.ShouldBind(params); err != nil {
-		c.String(http.StatusBadRequest, "Missing required parameters")
+		responseErrorAndLogMaybeHack(c, http.StatusBadRequest, "Missing required parameters")
 		return
 	}
 
 	authCode, ok := o.authCodeStorage.Get(params.Code)
 	if !ok {
 		// This should never happen unless the requester is cheating.
-		c.String(http.StatusBadRequest, "Invalid authorization code")
+		responseErrorAndLogMaybeHack(c, http.StatusBadRequest, "Invalid authorization code")
 		return
 	}
 
@@ -70,7 +70,7 @@ func (o *OpenIDProvider) handleTokenAuthorizationCode(c *gin.Context) {
 
 	if authCode.ClientID != params.ClientID {
 		// This should never happen unless the requester is cheating.
-		c.String(http.StatusBadRequest, "Invalid client ID")
+		responseErrorAndLogMaybeHack(c, http.StatusBadRequest, "Invalid client ID")
 		return
 	}
 
@@ -79,7 +79,7 @@ func (o *OpenIDProvider) handleTokenAuthorizationCode(c *gin.Context) {
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			// This should never happen unless the requester is cheating.
-			c.String(http.StatusBadRequest, "Client not found")
+			responseErrorAndLogMaybeHack(c, http.StatusBadRequest, "Client not found")
 			return
 		} else {
 			logger.Error().Err(err).Msg("Failed to get client")
@@ -90,7 +90,7 @@ func (o *OpenIDProvider) handleTokenAuthorizationCode(c *gin.Context) {
 
 	if client.Secret != params.ClientSecret {
 		// This should never happen unless the requester is cheating.
-		c.String(http.StatusBadRequest, "Invalid client secret")
+		responseErrorAndLogMaybeHack(c, http.StatusBadRequest, "Invalid client secret")
 		return
 	}
 
@@ -126,14 +126,14 @@ func (o *OpenIDProvider) handleTokenRefreshToken(c *gin.Context) {
 	params := &handleTokenRefreshTokenParams{}
 
 	if err := c.ShouldBind(params); err != nil {
-		c.String(http.StatusBadRequest, "Missing required parameters")
+		responseErrorAndLogMaybeHack(c, http.StatusBadRequest, "Missing required parameters")
 		return
 	}
 
 	refreshTokenParts := strings.Split(params.RefreshToken, ".")
 	if len(refreshTokenParts) != 3 {
 		// This should never happen unless the requester is cheating.
-		c.String(http.StatusBadRequest, "Invalid refresh token: format")
+		responseErrorAndLogMaybeHack(c, http.StatusBadRequest, "Invalid refresh token: format")
 		return
 	}
 
@@ -146,7 +146,7 @@ func (o *OpenIDProvider) handleTokenRefreshToken(c *gin.Context) {
 			return
 		}
 		// This should never happen unless the requester is cheating.
-		c.String(http.StatusBadRequest, "Invalid refresh token: signature")
+		responseErrorAndLogMaybeHack(c, http.StatusBadRequest, "Invalid refresh token: signature")
 		return
 	}
 
@@ -154,14 +154,14 @@ func (o *OpenIDProvider) handleTokenRefreshToken(c *gin.Context) {
 	aud, ok := verifiedToken.Audience()
 	if !ok || !slices.Contains(aud, params.ClientID) {
 		// This should never happen unless the requester is cheating.
-		c.String(http.StatusBadRequest, "Invalid refresh token: audience")
+		responseErrorAndLogMaybeHack(c, http.StatusBadRequest, "Invalid refresh token: audience")
 		return
 	}
 
 	// Check token has exp field
 	_, ok = verifiedToken.Expiration()
 	if !ok {
-		c.String(http.StatusBadRequest, "Invalid refresh token: no expiration")
+		responseErrorAndLogMaybeHack(c, http.StatusBadRequest, "Invalid refresh token: no expiration")
 		return
 	}
 
@@ -169,7 +169,7 @@ func (o *OpenIDProvider) handleTokenRefreshToken(c *gin.Context) {
 	iss, ok := verifiedToken.Issuer()
 	if !ok || iss != o.config.Issuer {
 		// This should never happen unless the requester is cheating.
-		c.String(http.StatusBadRequest, "Invalid refresh token: issuer")
+		responseErrorAndLogMaybeHack(c, http.StatusBadRequest, "Invalid refresh token: issuer")
 		return
 	}
 
@@ -178,7 +178,7 @@ func (o *OpenIDProvider) handleTokenRefreshToken(c *gin.Context) {
 	err = verifiedToken.Get("scope", &scopes)
 	if err != nil {
 		// This should never happen unless the requester is cheating.
-		c.String(http.StatusBadRequest, "Invalid refresh token: scope")
+		responseErrorAndLogMaybeHack(c, http.StatusBadRequest, "Invalid refresh token: scope")
 		return
 	}
 
@@ -188,7 +188,7 @@ func (o *OpenIDProvider) handleTokenRefreshToken(c *gin.Context) {
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			logger.Error().Err(err).Msg("Refresh token not found, private key leak?")
-			c.String(http.StatusBadRequest, "Invalid refresh token: not found")
+			responseErrorAndLogMaybeHack(c, http.StatusBadRequest, "Invalid refresh token: not found")
 			return
 		}
 		logger.Error().Err(err).Msg("Database error during refresh token token request fetch refresh token")
@@ -197,14 +197,14 @@ func (o *OpenIDProvider) handleTokenRefreshToken(c *gin.Context) {
 	}
 
 	if refreshToken.Revoked {
-		c.String(http.StatusBadRequest, "Revoked refresh token")
+		responseErrorAndLogMaybeHack(c, http.StatusBadRequest, "Revoked refresh token")
 		return
 	}
 
 	if refreshToken.Used {
 		// Replay attack
 		logger.Error().Msg("Replay attack detected")
-		c.String(http.StatusBadRequest, "Used refresh token")
+		responseErrorAndLogMaybeHack(c, http.StatusBadRequest, "Used refresh token")
 		return
 	}
 
@@ -213,7 +213,7 @@ func (o *OpenIDProvider) handleTokenRefreshToken(c *gin.Context) {
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			// This should never happen unless the requester is cheating.
-			c.String(http.StatusBadRequest, "Client not found")
+			responseErrorAndLogMaybeHack(c, http.StatusBadRequest, "Client not found")
 			return
 		} else {
 			logger.Error().Err(err).Msg("Failed to get client")
@@ -224,7 +224,7 @@ func (o *OpenIDProvider) handleTokenRefreshToken(c *gin.Context) {
 
 	if client.Secret != params.ClientSecret {
 		// This should never happen unless the requester is cheating.
-		c.String(http.StatusBadRequest, "Invalid client secret")
+		responseErrorAndLogMaybeHack(c, http.StatusBadRequest, "Invalid client secret")
 		return
 	}
 

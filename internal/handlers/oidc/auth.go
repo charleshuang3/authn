@@ -31,23 +31,22 @@ func (o *OpenIDProvider) handleAuthorize(c *gin.Context) {
 	params := &handleAuthorizeParams{}
 
 	if err := c.ShouldBindQuery(params); err != nil {
-		c.String(http.StatusBadRequest, "Missing required parameters")
+		responseErrorAndLogMaybeHack(c, http.StatusBadRequest, "Missing required parameters")
 		return
 	}
 
 	if params.ResponseType != "code" {
-		c.String(http.StatusBadRequest, "Unsupported response type, only 'code' is supported")
+		responseErrorAndLogMaybeHack(c, http.StatusBadRequest, "Unsupported response type, only 'code' is supported")
 		return
 	}
 
 	if !stateRE.MatchString(params.State) {
-		c.String(http.StatusBadRequest, "Invalid state parameter format")
+		responseErrorAndLogMaybeHack(c, http.StatusBadRequest, "Invalid state parameter format")
 		return
 	}
 
 	if _, ok := o.authStateStorage.Get(params.State); ok {
-		// This should never happen unless the requester is cheating.
-		c.String(http.StatusBadRequest, "Conflict state")
+		responseErrorAndLogMaybeHack(c, http.StatusBadRequest, "Conflict state")
 		return
 	}
 
@@ -55,7 +54,7 @@ func (o *OpenIDProvider) handleAuthorize(c *gin.Context) {
 	client, err := storage.GetClientByID(o.db, params.ClientID)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			c.String(http.StatusBadRequest, "Client not found")
+			responseErrorAndLogMaybeHack(c, http.StatusBadRequest, "Client not found")
 			return
 		} else {
 			logger.Error().Err(err).Msg("Failed to get client")
@@ -67,13 +66,13 @@ func (o *OpenIDProvider) handleAuthorize(c *gin.Context) {
 	// Verify scopes
 	scopes := strings.Split(params.Scope, " ")
 	if !client.VerifyScopesAllowed(scopes) {
-		c.String(http.StatusBadRequest, "Invalid scope")
+		responseErrorAndLogMaybeHack(c, http.StatusBadRequest, "Invalid scope")
 		return
 	}
 
 	// Check if redirectURI matches one of the registered URIs for the client
 	if !client.VerifyRedirectURI(params.RedirectURI) {
-		c.String(http.StatusBadRequest, "Invalid redirect URI")
+		responseErrorAndLogMaybeHack(c, http.StatusBadRequest, "Invalid redirect URI")
 		return
 	}
 

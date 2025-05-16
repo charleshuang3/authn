@@ -26,14 +26,14 @@ func (o *OpenIDProvider) handleLogin(c *gin.Context) {
 
 	// 1. Use gin binding; if missing params, response 400 bad request
 	if err := c.ShouldBind(params); err != nil {
-		c.String(http.StatusBadRequest, "Missing required parameters")
+		responseErrorAndLogMaybeHack(c, http.StatusBadRequest, "Missing required parameters")
 		return
 	}
 
 	// 2. Check state in storage
 	authState, ok := o.authStateStorage.Get(params.State)
 	if !ok {
-		c.String(http.StatusBadRequest, "Invalid state")
+		responseErrorAndLogMaybeHack(c, http.StatusBadRequest, "Invalid state")
 		return
 	}
 	// Remove state after use to prevent replay attacks
@@ -43,7 +43,7 @@ func (o *OpenIDProvider) handleLogin(c *gin.Context) {
 	user, err := storage.GetUserByUsernameOrEmail(o.db, params.Username)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			// Generic message for security reasons
+			logMayHack(c, "User not found")
 			o.render401(c, "Invalid username or password")
 			return
 		}
@@ -54,6 +54,7 @@ func (o *OpenIDProvider) handleLogin(c *gin.Context) {
 
 	// 4. Check password use user.CheckPassword()
 	if !user.CheckPassword(params.Password) {
+		logMayHack(c, "Invalid password")
 		o.render401(c, "Invalid username or password")
 		return
 	}
