@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"net/http"
 	"slices"
 	"time"
 
@@ -176,11 +177,16 @@ func (m *FirewallMiddleware) Middleware() gin.HandlerFunc {
 
 		// after handler
 		reason, ok := c.Get(KeyHackingError)
-		if !ok {
+		if ok {
+			ip := c.ClientIP()
+			m.fw.LogIPError(ip, reason.(string))
 			return
 		}
 
-		ip := c.ClientIP()
-		m.fw.LogIPError(ip, reason.(string))
+		// this means user request to url undefined in router.
+		if c.Writer.Status() == http.StatusNotFound {
+			ip := c.ClientIP()
+			m.fw.LogIPError(ip, reason.(string))
+		}
 	}
 }
