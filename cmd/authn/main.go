@@ -15,7 +15,7 @@ import (
 
 	"github.com/charleshuang3/authn/internal/config"
 	"github.com/charleshuang3/authn/internal/gormw"
-	"github.com/charleshuang3/authn/internal/handlers/middleware"
+	"github.com/charleshuang3/authn/internal/handlers/firewall"
 	"github.com/charleshuang3/authn/internal/handlers/oidc"
 	"github.com/charleshuang3/authn/internal/handlers/statisfiles"
 	"github.com/charleshuang3/authn/internal/storage"
@@ -54,32 +54,23 @@ func main() {
 	router := gin.Default()
 
 	// add firewall middleware
-	fw := middleware.NewFirewallMiddleware(&cfg.Firewall)
+	fw := firewall.New(&cfg.Firewall)
 	router.Use(fw.Middleware())
 
 	// Register OIDC handlers
 	oidcProvider := oidc.NewOpenIDProvider(&cfg.OIDC, db)
 	oidcProvider.RegisterHandlers(router.Group("/"))
-
 	statisfiles.RegisterHandlers(router.Group("/"))
 
-	// Start server
-	srv := &http.Server{
-		Addr: fmt.Sprintf(":%d", cfg.Port),
-		// Good practice to set timeouts to avoid Slowloris attacks.
-		WriteTimeout: time.Second * 15,
-		ReadTimeout:  time.Second * 15,
-		IdleTimeout:  time.Second * 60,
-		Handler:      router,
-	}
+	oidcServer := startServer("oidc", cfg.Port, router)
 
-	// Run our server in a goroutine so that it doesn't block.
-	go func() {
-		log.Printf("start server at %q", srv.Addr)
-		if err := srv.ListenAndServe(); err != nil {
-			log.Fatal().Err(err).Msg("Failed to start server")
-		}
-	}()
+	// firewall handler
+	fwRouter := gin.Default()
+	fw.RegisterHandlers(fwRouter.Group("/"))
+
+	fwServer := startServer("firewall", cfg.BanHandlersPort, fwRouter)
+
+	// Wait for interrupt signal to gracefully shutdown the server)
 
 	c := make(chan os.Signal, 1)
 	// We'll accept graceful shutdowns when quit via SIGINT (Ctrl+C)
@@ -95,8 +86,33 @@ func main() {
 	defer cancel()
 	// Doesn't block if no connections, but will otherwise wait
 	// until the timeout deadline.
-	srv.Shutdown(ctx)
+	oidcServer.Shutdown(ctx)
+
+	ctx, cancel = context.WithTimeout(context.Background(), wait)
+	fwServer.Shutdown(ctx)
 
 	log.Info().Msg("shutting down")
 	os.Exit(0)
+}
+
+func startServer(name string, port uint, handler http.Handler) *http.Server {
+	// Start server
+	srv := &http.Server{
+		Addr: fmt.Sprintf(":%d", port),
+		// Good practice to set timeouts to avoid Slowloris attacks.
+		WriteTimeout: time.Second * 15,
+		ReadTimeout:  time.Second * 15,
+		IdleTimeout:  time.Second * 60,
+		Handler:      handler,
+	}
+
+	// Run our server in a goroutine so that it doesn't block.
+	go func() {
+		log.Printf("start %s server at %q", name, srv.Addr)
+		if err := srv.ListenAndServe(); err != nil {
+			log.Fatal().Err(err).Msg("Failed to start server")
+		}
+	}()
+
+	return srv
 }

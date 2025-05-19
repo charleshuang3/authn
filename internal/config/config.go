@@ -7,7 +7,7 @@ import (
 	"gopkg.in/yaml.v2"
 
 	"github.com/charleshuang3/authn/internal/gormw"
-	"github.com/charleshuang3/authn/internal/handlers/middleware"
+	middleware "github.com/charleshuang3/authn/internal/handlers/firewall"
 	"github.com/charleshuang3/authn/internal/handlers/oidc"
 )
 
@@ -16,11 +16,12 @@ var (
 )
 
 type Config struct {
-	Port     uint                      `yaml:"port"`
-	GinMode  string                    `yaml:"gin_mode"`
-	OIDC     oidc.OIDCProviderConfig   `yaml:"oidc"`
-	DB       gormw.Config              `yaml:"db"`
-	Firewall middleware.FirewallConfig `yaml:"firewall"`
+	Port            uint                      `yaml:"port"`
+	BanHandlersPort uint                      `yaml:"ban_handlers_port"`
+	GinMode         string                    `yaml:"gin_mode"`
+	OIDC            oidc.OIDCProviderConfig   `yaml:"oidc"`
+	DB              gormw.Config              `yaml:"db"`
+	Firewall        middleware.FirewallConfig `yaml:"firewall"`
 }
 
 func LoadConfig(path string) *Config {
@@ -45,6 +46,10 @@ func LoadConfig(path string) *Config {
 func (c *Config) validate() {
 	if c.Port == 0 {
 		logger.Fatal().Msg("Port is missing")
+	}
+
+	if c.BanHandlersPort == 0 {
+		logger.Fatal().Msg("BanHandlersPort is missing")
 	}
 
 	if c.GinMode == "" {

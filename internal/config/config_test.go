@@ -9,7 +9,7 @@ import (
 	"gopkg.in/yaml.v2"
 
 	"github.com/charleshuang3/authn/internal/gormw"
-	"github.com/charleshuang3/authn/internal/handlers/middleware"
+	middleware "github.com/charleshuang3/authn/internal/handlers/firewall"
 	"github.com/charleshuang3/authn/internal/handlers/oidc"
 )
 

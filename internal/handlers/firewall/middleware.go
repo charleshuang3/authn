@@ -1,11 +1,11 @@
-package middleware
+package firewall
 
 import (
 	"net/http"
 	"slices"
 	"time"
 
-	"github.com/charleshuang3/firewall"
+	fw "github.com/charleshuang3/firewall"
 	"github.com/charleshuang3/firewall/gcplog"
 	"github.com/charleshuang3/firewall/ipgeo"
 	"github.com/charleshuang3/firewall/opn"
@@ -18,7 +18,7 @@ import (
 )
 
 var (
-	logger = log.With().Str("component", "oidc-provider").Logger()
+	logger = log.With().Str("component", "firewall").Logger()
 )
 
 type ForgivableError struct {
@@ -113,12 +113,13 @@ func (c *FirewallConfig) applyDefault() {
 	}
 }
 
-type FirewallMiddleware struct {
-	fw *firewall.Firewall
+type Firewall struct {
+	fw   *fw.Firewall
+	conf *FirewallConfig
 }
 
-func NewFirewallMiddleware(conf *FirewallConfig) *FirewallMiddleware {
-	var firewallProvider firewall.IFirewall
+func New(conf *FirewallConfig) *Firewall {
+	var firewallProvider fw.IFirewall
 	switch conf.Provider {
 	case "ros":
 		firewallProvider = ros.New(
@@ -133,7 +134,7 @@ func NewFirewallMiddleware(conf *FirewallConfig) *FirewallMiddleware {
 		// keep firewallProvider nil which means no block on firewall
 	}
 
-	var fwlogger firewall.ILogger
+	var fwlogger fw.ILogger
 	if conf.GoogleKeyFile != "" {
 		var err error
 		fwlogger, err = gcplog.New(conf.GoogleKeyFile, conf.GoogleProjectID, "authn")
@@ -154,23 +155,24 @@ func NewFirewallMiddleware(conf *FirewallConfig) *FirewallMiddleware {
 		logger.Fatal().Err(err).Msg("Failed to create firewall middleware")
 	}
 
-	fw := firewall.New(
+	fw := fw.New(
 		conf.Whitelist,
 		firewallProvider,
 		fwlogger,
 		mm,
-		firewall.ForgivableError{
+		fw.ForgivableError{
 			Duration:    time.Duration(conf.Forgivable.DurationInMinute) * time.Minute,
 			Count:       int(conf.Forgivable.Count),
 			BanInMinute: int(conf.BanMinutes),
 		})
 
-	return &FirewallMiddleware{
-		fw: fw,
+	return &Firewall{
+		fw:   fw,
+		conf: conf,
 	}
 }
 
-func (m *FirewallMiddleware) Middleware() gin.HandlerFunc {
+func (f *Firewall) Middleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		// run handle
 		c.Next()
@@ -179,14 +181,15 @@ func (m *FirewallMiddleware) Middleware() gin.HandlerFunc {
 		reason, ok := c.Get(KeyHackingError)
 		if ok {
 			ip := c.ClientIP()
-			m.fw.LogIPError(ip, reason.(string))
+			f.fw.LogIPError(ip, reason.(string))
 			return
 		}
 
 		// this means user request to url undefined in router.
 		if c.Writer.Status() == http.StatusNotFound {
 			ip := c.ClientIP()
-			m.fw.LogIPError(ip, reason.(string))
+			f.fw.LogIPError(ip, "undefined_url")
+			return
 		}
 	}
 }

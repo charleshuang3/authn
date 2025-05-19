@@ -56,7 +56,6 @@ func (o *OpenIDProvider) RegisterHandlers(rg *gin.RouterGroup) {
 		oauth2Routes.GET("/.well-known/openid-configuration", o.handleWellKnownConfig)
 		// JWKS Endpoint
 		oauth2Routes.GET("/.well-known/jwks.json", o.handleJWKS)
-
 	}
 
 	// ---- Identity broker: SSO callback ----
