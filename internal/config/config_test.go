@@ -22,8 +22,9 @@ func TestLoadConfigSuccess(t *testing.T) {
 
 	// Sample valid configuration data
 	sampleConfig := &Config{
-		Port:    8080,
-		GinMode: "debug",
+		Port:            8080,
+		BanHandlersPort: 8081,
+		GinMode:         "debug",
 		OIDC: oidc.OIDCProviderConfig{
 			Title:         "Test OIDC Provider",
 			PrivateKeyPEM: "testprivatekeypem",
