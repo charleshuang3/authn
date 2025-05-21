@@ -19,3 +19,9 @@ The application is configured via a YAML file. See `config.sample.yaml` for exam
 ```sh
 go run cmd/authm/main.go -c config.yaml
 ```
+
+## Caution
+
+This project is intended for self-hosted home use and does not constitute a full OIDC implementation.
+
+The deployment is not scalable, for example the storage of the auth_code is in cache rather than a database.
