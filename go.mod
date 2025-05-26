@@ -5,7 +5,7 @@ go 1.24.3
 require (
 	github.com/coreos/go-oidc/v3 v3.14.1
 	github.com/dgraph-io/ristretto/v2 v2.2.0
-	github.com/gin-gonic/gin v1.10.0
+	github.com/gin-gonic/gin v1.10.1
 	github.com/glebarez/sqlite v1.11.0
 	github.com/google/uuid v1.6.0
 	github.com/hashicorp/go-set/v3 v3.0.0
