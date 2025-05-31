@@ -57,7 +57,7 @@ func (o *OpenIDProvider) handleNotOIDCUserInfo(c *gin.Context) {
 	user, err := storage.GetUserByUsername(o.db, params.Username)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			responseErrorAndLogMaybeHack(c, http.StatusBadRequest, "Invalid username")
+			responseErrorAndLogMaybeHack(c, http.StatusUnauthorized, "Invalid username")
 			return
 		}
 		logger.Error().Err(err).Msg("Database error during user lookup")
@@ -66,7 +66,7 @@ func (o *OpenIDProvider) handleNotOIDCUserInfo(c *gin.Context) {
 	}
 
 	if !user.CheckPassword(params.Password) {
-		responseErrorAndLogMaybeHack(c, http.StatusBadRequest, "Invalid password")
+		responseErrorAndLogMaybeHack(c, http.StatusUnauthorized, "Invalid password")
 		return
 	}
 

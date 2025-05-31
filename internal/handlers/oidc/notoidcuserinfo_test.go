@@ -158,7 +158,7 @@ func TestHandleNotOIDCUserInfo_Error(t *testing.T) {
 			clientSecret:   "test-secret",
 			username:       "nonexistentuser",
 			password:       "correctpassword",
-			expectedStatus: http.StatusBadRequest,
+			expectedStatus: http.StatusUnauthorized,
 			expectedBody:   "Invalid username",
 		},
 		{
@@ -167,7 +167,7 @@ func TestHandleNotOIDCUserInfo_Error(t *testing.T) {
 			clientSecret:   "test-secret",
 			username:       "existinguser",
 			password:       "wrongpassword",
-			expectedStatus: http.StatusBadRequest,
+			expectedStatus: http.StatusUnauthorized,
 			expectedBody:   "Invalid password",
 		},
 	}
