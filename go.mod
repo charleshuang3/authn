@@ -13,7 +13,7 @@ require (
 	github.com/rs/zerolog v1.34.0
 	github.com/stretchr/testify v1.10.0
 	golang.org/x/crypto v0.38.0
-	gorm.io/driver/postgres v1.5.11
+	gorm.io/driver/postgres v1.6.0
 	gorm.io/gorm v1.30.0
 )
 
