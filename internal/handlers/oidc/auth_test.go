@@ -48,7 +48,7 @@ func setupTestProvider(t *testing.T) (*OpenIDProvider, *gormw.DB, *gin.Engine) {
 	return provider, database, router
 }
 
-func setupTestForHandleAuthorize(t *testing.T) (*OpenIDProvider, *gormw.DB, *gin.Engine) {
+func setupTestForHandleAuthorize(t *testing.T, allowPasswordLogin bool) (*OpenIDProvider, *gormw.DB, *gin.Engine) {
 	t.Helper()
 
 	provider, db, router := setupTestProvider(t)
@@ -62,7 +62,7 @@ func setupTestForHandleAuthorize(t *testing.T) (*OpenIDProvider, *gormw.DB, *gin
 		Secret:             "test-client-secret",
 		RedirectURIPrefixs: "http://localhost:8080/callback",
 		AllowedScopes:      "openid profile email offline_access",
-		AllowPasswordLogin: true,
+		AllowPasswordLogin: allowPasswordLogin,
 		AllowGoogleLogin:   true,
 	}
 	err := db.Create(&testClient).Error
@@ -212,7 +212,7 @@ func TestHandleAuthorize_Error(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			_, _, router := setupTestForHandleAuthorize(t)
+			_, _, router := setupTestForHandleAuthorize(t, true)
 
 			query := "?" + tt.queryParams.Encode()
 			req := httptest.NewRequest(http.MethodGet, "/oauth2/authorize"+query, nil)
@@ -225,8 +225,8 @@ func TestHandleAuthorize_Error(t *testing.T) {
 	}
 }
 
-func TestHandleAuthorize_Success(t *testing.T) {
-	provider, _, router := setupTestForHandleAuthorize(t)
+func TestHandleAuthorize_Success_LoginPage(t *testing.T) {
+	provider, _, router := setupTestForHandleAuthorize(t, true)
 
 	// Valid query parameters for a success case
 	queryParams := url.Values{
@@ -242,7 +242,7 @@ func TestHandleAuthorize_Success(t *testing.T) {
 	rec := httptest.NewRecorder()
 	router.ServeHTTP(rec, req)
 
-	// Expect a redirect to the login page
+	// Expect a login page
 	assert.Equal(t, http.StatusOK, rec.Code)
 
 	body, err := io.ReadAll(rec.Body)
@@ -251,4 +251,25 @@ func TestHandleAuthorize_Success(t *testing.T) {
 	content := string(body)
 	assert.Contains(t, content, provider.config.Title, "RenderLoginPage() output should contain title")
 	assert.Contains(t, content, queryParams["state"][0], "RenderLoginPage() output should contain state")
+}
+
+func TestHandleAuthorize_Success_Redirect(t *testing.T) {
+	_, _, router := setupTestForHandleAuthorize(t, false)
+
+	// Valid query parameters for a success case
+	queryParams := url.Values{
+		"client_id":     {"test-client-id"},
+		"redirect_uri":  {"http://localhost:8080/callback"},
+		"response_type": {"code"},
+		"state":         {"valid-state"},
+		"scope":         {"openid profile"},
+	}
+
+	query := "?" + queryParams.Encode()
+	req := httptest.NewRequest(http.MethodGet, "/oauth2/authorize"+query, nil)
+	rec := httptest.NewRecorder()
+	router.ServeHTTP(rec, req)
+
+	// Expect a redirect to google login
+	assert.Equal(t, http.StatusFound, rec.Code)
 }

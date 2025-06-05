@@ -82,13 +82,21 @@ func (o *OpenIDProvider) handleAuthorize(c *gin.Context) {
 		Scopes:      scopes,
 	})
 
+	googleLoginURL := o.config.SSO.Google.oauth2Config().AuthCodeURL(params.State)
+
+	// for google login only, we can skip the login page and redirect to google login.
+	if client.AllowGoogleLogin && !client.AllowPasswordLogin {
+		c.Redirect(http.StatusFound, googleLoginURL)
+		return
+	}
+
 	// Return the login page with the state value.
 	if err := o.RenderLoginPage(c.Writer, &LoginPageData{
 		Title:              o.config.Title,
 		AllowPasswordLogin: client.AllowPasswordLogin,
 		AllowGoogleLogin:   client.AllowGoogleLogin,
 		State:              params.State,
-		GoogleLoginURL:     o.config.SSO.Google.oauth2Config().AuthCodeURL(params.State),
+		GoogleLoginURL:     googleLoginURL,
 	}); err != nil {
 		logger.Error().Err(err).Msg("Failed to render login page")
 		c.String(http.StatusInternalServerError, "Failed to render login page")
