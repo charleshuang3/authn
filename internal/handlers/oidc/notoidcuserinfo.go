@@ -5,9 +5,10 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/charleshuang3/authn/internal/storage"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
+
+	"github.com/charleshuang3/authn/internal/storage"
 )
 
 type handleNotOIDCUserInfoParams struct {

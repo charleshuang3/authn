@@ -5,6 +5,10 @@ import (
 	"slices"
 	"time"
 
+	"github.com/gin-gonic/gin"
+	zlog "github.com/rs/zerolog"
+	"github.com/rs/zerolog/log"
+
 	fw "github.com/charleshuang3/firewall"
 	"github.com/charleshuang3/firewall/gcplog"
 	"github.com/charleshuang3/firewall/ipgeo"
@@ -12,9 +16,6 @@ import (
 	"github.com/charleshuang3/firewall/pf"
 	"github.com/charleshuang3/firewall/ros"
 	"github.com/charleshuang3/firewall/zerolog"
-	"github.com/gin-gonic/gin"
-	zlog "github.com/rs/zerolog"
-	"github.com/rs/zerolog/log"
 )
 
 var (

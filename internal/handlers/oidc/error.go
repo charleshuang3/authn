@@ -3,8 +3,9 @@ package oidc
 import (
 	"net/http"
 
-	middleware "github.com/charleshuang3/authn/internal/handlers/firewall"
 	"github.com/gin-gonic/gin"
+
+	middleware "github.com/charleshuang3/authn/internal/handlers/firewall"
 )
 
 var (
