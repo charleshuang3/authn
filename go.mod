@@ -9,7 +9,7 @@ require (
 	github.com/glebarez/sqlite v1.11.0
 	github.com/google/uuid v1.6.0
 	github.com/hashicorp/go-set/v3 v3.0.0
-	github.com/lestrrat-go/jwx/v3 v3.0.1
+	github.com/lestrrat-go/jwx/v3 v3.0.3
 	github.com/rs/zerolog v1.34.0
 	github.com/stretchr/testify v1.10.0
 	golang.org/x/crypto v0.38.0
@@ -83,7 +83,7 @@ require (
 	github.com/leodido/go-urn v1.4.0 // indirect
 	github.com/lestrrat-go/blackmagic v1.0.3 // indirect
 	github.com/lestrrat-go/httpcc v1.0.1 // indirect
-	github.com/lestrrat-go/httprc/v3 v3.0.0-beta2 // indirect
+	github.com/lestrrat-go/httprc/v3 v3.0.0 // indirect
 	github.com/lestrrat-go/option v1.0.1 // indirect
 	github.com/mattn/go-colorable v0.1.14 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
