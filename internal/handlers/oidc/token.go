@@ -204,7 +204,7 @@ func (o *OpenIDProvider) handleTokenRefreshToken(c *gin.Context) {
 	if refreshToken.Used {
 		// Replay attack
 		logger.Error().Msg("Replay attack detected")
-		responseErrorAndLogMaybeHack(c, http.StatusBadRequest, "Used refresh token")
+		c.String(http.StatusBadRequest, "Used refresh token")
 		return
 	}
 
