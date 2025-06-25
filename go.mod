@@ -1,6 +1,6 @@
 module github.com/charleshuang3/authn
 
-go 1.24.3
+go 1.24.4
 
 require (
 	github.com/coreos/go-oidc/v3 v3.14.1
@@ -19,7 +19,7 @@ require (
 
 require (
 	github.com/badoux/checkmail v1.2.4
-	github.com/charleshuang3/firewall v0.0.0-20250619043056-29e7a515c1eb
+	github.com/charleshuang3/firewall v0.0.0-20250625035827-834eafd9dcb8
 	github.com/go-co-op/gocron/v2 v2.16.2
 )
 
@@ -100,7 +100,7 @@ require (
 	github.com/twitchyliquid64/golang-asm v0.15.1 // indirect
 	github.com/ugorji/go/codec v1.3.0 // indirect
 	golang.org/x/arch v0.18.0 // indirect
-	golang.org/x/exp v0.0.0-20250606033433-dcc06ee1d476 // indirect
+	golang.org/x/exp v0.0.0-20250620022241-b7579e27df2b // indirect
 	golang.org/x/net v0.41.0 // indirect
 	golang.org/x/oauth2 v0.30.0
 	golang.org/x/sync v0.15.0 // indirect
@@ -109,7 +109,7 @@ require (
 	google.golang.org/protobuf v1.36.6 // indirect
 	gopkg.in/yaml.v2 v2.4.0
 	gopkg.in/yaml.v3 v3.0.1 // indirect
-	modernc.org/libc v1.66.0 // indirect
+	modernc.org/libc v1.66.1 // indirect
 	modernc.org/mathutil v1.7.1 // indirect
 	modernc.org/memory v1.11.0 // indirect
 	modernc.org/sqlite v1.38.0 // indirect
