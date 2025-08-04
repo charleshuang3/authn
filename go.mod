@@ -3,7 +3,7 @@ module github.com/charleshuang3/authn
 go 1.24.4
 
 require (
-	github.com/coreos/go-oidc/v3 v3.14.1
+	github.com/coreos/go-oidc/v3 v3.15.0
 	github.com/dgraph-io/ristretto/v2 v2.2.0
 	github.com/gin-gonic/gin v1.10.1
 	github.com/glebarez/sqlite v1.11.0
