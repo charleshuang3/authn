@@ -8,7 +8,7 @@ require (
 	github.com/gin-gonic/gin v1.10.1
 	github.com/glebarez/sqlite v1.11.0
 	github.com/google/uuid v1.6.0
-	github.com/hashicorp/go-set/v3 v3.0.0
+	github.com/hashicorp/go-set/v3 v3.0.1
 	github.com/lestrrat-go/jwx/v3 v3.0.8
 	github.com/rs/zerolog v1.34.0
 	github.com/stretchr/testify v1.10.0
