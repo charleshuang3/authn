@@ -5,8 +5,8 @@ import (
 	"path/filepath"
 	"testing"
 
+	"github.com/goccy/go-yaml"
 	"github.com/stretchr/testify/assert"
-	"gopkg.in/yaml.v2"
 
 	"github.com/charleshuang3/authn/internal/gormw"
 	middleware "github.com/charleshuang3/authn/internal/handlers/firewall"

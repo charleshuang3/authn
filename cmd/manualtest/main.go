@@ -7,9 +7,9 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-co-op/gocron/v2"
+	"github.com/goccy/go-yaml"
 	"github.com/rs/zerolog/log"
 	"golang.org/x/crypto/bcrypt"
-	"gopkg.in/yaml.v2"
 
 	"github.com/charleshuang3/authn/cmd/manualtest/internal/testapp"
 	"github.com/charleshuang3/authn/internal/config"

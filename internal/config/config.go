@@ -3,8 +3,8 @@ package config
 import (
 	"os"
 
+	"github.com/goccy/go-yaml"
 	"github.com/rs/zerolog/log"
-	"gopkg.in/yaml.v2"
 
 	"github.com/charleshuang3/authn/internal/gormw"
 	middleware "github.com/charleshuang3/authn/internal/handlers/firewall"
