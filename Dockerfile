@@ -1,5 +1,5 @@
 # Stage 1: Build the Go binary
-FROM golang:1.24 AS builder
+FROM golang:1.26 AS builder
 
 WORKDIR /app
 
@@ -16,7 +16,7 @@ COPY . .
 RUN CGO_ENABLED=0 GOOS=linux go build -o authn ./cmd/authn/main.go
 
 # Stage 2: Create a minimal runtime image
-FROM alpine:3.21
+FROM alpine:latest
 
 WORKDIR /app
 
