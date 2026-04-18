@@ -53,6 +53,9 @@ func main() {
 	gin.SetMode(cfg.GinMode)
 	router := gin.Default()
 
+	// add CORS middleware
+	router.Use(corsMiddleware())
+
 	// add firewall middleware
 	fw := firewall.New(&cfg.Firewall)
 	router.Use(fw.Middleware())
@@ -115,4 +118,25 @@ func startServer(name string, port uint, handler http.Handler) *http.Server {
 	}()
 
 	return srv
+}
+
+func corsMiddleware() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		origin := c.Request.Header.Get("Origin")
+		if origin != "" {
+			c.Writer.Header().Set("Access-Control-Allow-Origin", origin)
+		} else {
+			c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
+		}
+		c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")
+		c.Writer.Header().Set("Access-Control-Allow-Headers", "Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization, accept, origin, Cache-Control, X-Requested-With")
+		c.Writer.Header().Set("Access-Control-Allow-Methods", "POST, OPTIONS, GET, PUT, DELETE")
+
+		if c.Request.Method == "OPTIONS" {
+			c.AbortWithStatus(204)
+			return
+		}
+
+		c.Next()
+	}
 }
