@@ -20,7 +20,7 @@ require (
 require (
 	github.com/badoux/checkmail v1.2.4
 	github.com/charleshuang3/firewall v0.0.0-20260414141723-41942195b1b3
-	github.com/go-co-op/gocron/v2 v2.21.0
+	github.com/go-co-op/gocron/v2 v2.21.1
 	github.com/goccy/go-yaml v1.19.2
 )
 
