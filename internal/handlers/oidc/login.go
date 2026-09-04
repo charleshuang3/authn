@@ -5,9 +5,9 @@ import (
 	"errors"
 	"html/template"
 	"net/http"
+	"uuid"
 
 	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
 	"gorm.io/gorm"
 
 	"github.com/charleshuang3/authn/internal/models"

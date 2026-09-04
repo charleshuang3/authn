@@ -7,10 +7,10 @@ import (
 	"html/template"
 	"net/http"
 	"time"
+	"uuid"
 
 	"github.com/coreos/go-oidc/v3/oidc"
 	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
 	"github.com/rs/zerolog/log"
 	"golang.org/x/oauth2"
 )
@@ -162,7 +162,7 @@ func (h *handler) handle(c *gin.Context) {
 	}
 
 	if needLogin {
-		state := uuid.NewString()
+		state := uuid.New().String()
 		h.states[state] = c.Request.URL.String()
 		c.Redirect(http.StatusFound, h.oauth2Config.AuthCodeURL(state))
 		return
