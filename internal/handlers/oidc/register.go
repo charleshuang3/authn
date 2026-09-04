@@ -79,7 +79,7 @@ const (
 
 func validatePassword(password string) error {
 	if len(password) < 8 {
-		return errors.New("Password must be at least 8 characters long.")
+		return errors.New("password must be at least 8 characters long")
 	}
 
 	hasNumber := false
@@ -98,21 +98,21 @@ func validatePassword(password string) error {
 			hasSpecial = true
 		} else {
 			// Character is not in any of the allowed groups
-			return errors.New("Password contains disallowed characters.")
+			return errors.New("password contains disallowed characters")
 		}
 	}
 
 	if !hasNumber {
-		return errors.New("Password must contain at least one number.")
+		return errors.New("password must contain at least one number")
 	}
 	if !hasLower {
-		return errors.New("Password must contain at least one lowercase letter.")
+		return errors.New("password must contain at least one lowercase letter")
 	}
 	if !hasUpper {
-		return errors.New("Password must contain at least one uppercase letter.")
+		return errors.New("password must contain at least one uppercase letter")
 	}
 	if !hasSpecial {
-		return errors.New("Password must contain at least one special character.")
+		return errors.New("password must contain at least one special character")
 	}
 
 	return nil

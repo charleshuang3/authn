@@ -26,72 +26,72 @@ func TestValidatePassword(t *testing.T) {
 		{
 			name:        "too short",
 			password:    "V@lid1",
-			expectedErr: errors.New("Password must be at least 8 characters long."),
+			expectedErr: errors.New("password must be at least 8 characters long"),
 		},
 		{
 			name:        "missing number",
 			password:    "ValidP@ssword",
-			expectedErr: errors.New("Password must contain at least one number."),
+			expectedErr: errors.New("password must contain at least one number"),
 		},
 		{
 			name:        "missing lowercase",
 			password:    "VALIDP@SS1",
-			expectedErr: errors.New("Password must contain at least one lowercase letter."),
+			expectedErr: errors.New("password must contain at least one lowercase letter"),
 		},
 		{
 			name:        "missing uppercase",
 			password:    "validp@ss1",
-			expectedErr: errors.New("Password must contain at least one uppercase letter."),
+			expectedErr: errors.New("password must contain at least one uppercase letter"),
 		},
 		{
 			name:        "missing special char",
 			password:    "ValidPass1",
-			expectedErr: errors.New("Password must contain at least one special character."),
+			expectedErr: errors.New("password must contain at least one special character"),
 		},
 		{
 			name:        "disallowed character (space)",
 			password:    "ValidP@ss 1",
-			expectedErr: errors.New("Password contains disallowed characters."),
+			expectedErr: errors.New("password contains disallowed characters"),
 		},
 		{
 			name:        "disallowed character (tab)",
 			password:    "ValidP@ss\t1",
-			expectedErr: errors.New("Password contains disallowed characters."),
+			expectedErr: errors.New("password contains disallowed characters"),
 		},
 		{
 			name:        "disallowed character (emoji)",
 			password:    "ValidP@ss😊1",
-			expectedErr: errors.New("Password contains disallowed characters."),
+			expectedErr: errors.New("password contains disallowed characters"),
 		},
 		{
 			name:        "empty password",
 			password:    "",
-			expectedErr: errors.New("Password must be at least 8 characters long."),
+			expectedErr: errors.New("password must be at least 8 characters long"),
 		},
 		{
 			name:        "only numbers",
 			password:    "12345678",
-			expectedErr: errors.New("Password must contain at least one lowercase letter."),
+			expectedErr: errors.New("password must contain at least one lowercase letter"),
 		},
 		{
 			name:        "only lowercase",
 			password:    "abcdefgh",
-			expectedErr: errors.New("Password must contain at least one number."),
+			expectedErr: errors.New("password must contain at least one number"),
 		},
 		{
 			name:        "only uppercase",
 			password:    "ABCDEFGH",
-			expectedErr: errors.New("Password must contain at least one number."),
+			expectedErr: errors.New("password must contain at least one number"),
 		},
 		{
 			name:        "only special chars",
 			password:    "!!!!!!!!",
-			expectedErr: errors.New("Password must contain at least one number."),
+			expectedErr: errors.New("password must contain at least one number"),
 		},
 		{
 			name:        "no special but meets other criteria",
 			password:    "ValidPassword1",
-			expectedErr: errors.New("Password must contain at least one special character."),
+			expectedErr: errors.New("password must contain at least one special character"),
 		},
 	}
 

@@ -26,7 +26,9 @@ func main() {
 	if err != nil {
 		log.Fatal().Err(err).Msgf("failed to open config file")
 	}
-	defer file.Close()
+	defer func() {
+		_ = file.Close()
+	}()
 
 	sso := &oidc.SSOConfig{}
 

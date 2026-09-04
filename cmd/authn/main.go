@@ -89,10 +89,13 @@ func main() {
 	defer cancel()
 	// Doesn't block if no connections, but will otherwise wait
 	// until the timeout deadline.
-	oidcServer.Shutdown(ctx)
+	if err := oidcServer.Shutdown(ctx); err != nil {
+		log.Error().Err(err).Msg("oidcServer shutdown error")
+	}
 
-	ctx, cancel = context.WithTimeout(context.Background(), wait)
-	fwServer.Shutdown(ctx)
+	if err := fwServer.Shutdown(ctx); err != nil {
+		log.Error().Err(err).Msg("fwServer shutdown error")
+	}
 
 	log.Info().Msg("shutting down")
 	os.Exit(0)

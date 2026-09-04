@@ -31,7 +31,9 @@ func LoadConfig(path string) *Config {
 	if err != nil {
 		logger.Fatal().Err(err).Msgf("failed to open config file: %s", path)
 	}
-	defer file.Close()
+	defer func() {
+		_ = file.Close()
+	}()
 
 	decoder := yaml.NewDecoder(file)
 	if err := decoder.Decode(cfg); err != nil {

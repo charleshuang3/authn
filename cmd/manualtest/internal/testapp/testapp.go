@@ -75,9 +75,9 @@ func NewServer(port int) {
 	router.GET("/callback", h.handleCallback)
 	router.GET("/", h.index)
 	router.GET("/test", h.handle)
-	router.GET("/test/:path", h.handle)
-
-	router.Run(fmt.Sprintf(":%d", port))
+	if err := router.Run(fmt.Sprintf(":%d", port)); err != nil {
+		log.Fatal().Err(err).Msg("Failed to run router")
+	}
 }
 
 type handler struct {
@@ -148,7 +148,6 @@ func (h *handler) handle(c *gin.Context) {
 				return
 			}
 
-			rTokenInfo.readRefreshToken(tok)
 			if err := rTokenInfo.readRefreshToken(tok); err != nil {
 				log.Info().Err(err).Msg("Extract refresh token failed, need login")
 				needLogin = true
@@ -294,7 +293,7 @@ func (h *handler) handleCallback(c *gin.Context) {
 	// Store tokens in cookies
 	// For simplicity in this test app, we'll use the raw ID token string as the "access token"
 	// and the OAuth2 refresh token as the "refresh token".
-	c.SetCookie(accessTokenKey, rawIDToken, int(idToken.Expiry.Sub(time.Now()).Seconds()), "/", "127.0.0.1", false, true)
+	c.SetCookie(accessTokenKey, rawIDToken, int(time.Until(idToken.Expiry).Seconds()), "/", "127.0.0.1", false, true)
 	if oauth2Token.RefreshToken != "" {
 		c.SetCookie(refreshTokenKey, oauth2Token.RefreshToken, 0, "/", "127.0.0.1", false, true) // 0 for session cookie or a long expiry
 	}

@@ -85,7 +85,7 @@ func TestHandleUserRegister_Success(t *testing.T) {
 
 	// Setup invitation code
 	invitationCode := "valid-invitation-code"
-	storage.AddInvitation(db, invitationCode, "user-role")
+	require.NoError(t, storage.AddInvitation(db, invitationCode, "user-role"))
 
 	// Form data for successful registration
 	formData := url.Values{
@@ -240,7 +240,7 @@ func TestHandleUserRegister_Error(t *testing.T) {
 				"state":           {"test-state"},
 			},
 			expectedCode: http.StatusBadRequest,
-			expectedBody: "Password must be at least 8 characters long.",
+			expectedBody: "password must be at least 8 characters long",
 		},
 		{
 			name: "Empty invitation code",
@@ -311,7 +311,7 @@ func TestHandleUserRegister_Error(t *testing.T) {
 				}
 				db.Create(&existingUser)
 
-				storage.AddInvitation(db, "test-code", "test-role")
+				require.NoError(t, storage.AddInvitation(db, "test-code", "test-role"))
 			},
 		},
 		{
@@ -340,7 +340,7 @@ func TestHandleUserRegister_Error(t *testing.T) {
 				}
 				db.Create(&existingUser)
 
-				storage.AddInvitation(db, "test-code", "test-role")
+				require.NoError(t, storage.AddInvitation(db, "test-code", "test-role"))
 			},
 		},
 	}
