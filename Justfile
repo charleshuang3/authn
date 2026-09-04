@@ -2,9 +2,6 @@
 default:
     @just --list
 
-module_dirs := `go list -m -json | grep '"Dir"' | cut -d'"' -f4 | tr '\n' ' '`
-module_patterns := `go list -m -json | grep '"Dir"' | cut -d'"' -f4 | sed 's/$/\/.../' | tr '\n' ' '`
-
 # Format code with goimports
 fmt: fmt-backend
 
@@ -13,25 +10,19 @@ fmt-check: fmt-check-backend
 
 # Format Go code with goimports
 fmt-backend:
-    goimports -w -local "github.com/charleshuang3/authn" {{module_dirs}}
+    goimports -w -local "github.com/charleshuang3/authn" .
 
 # Check Go code format with goimports
 fmt-check-backend:
-    @test -z "$(goimports -local "github.com/charleshuang3/authn" -l {{module_dirs}})"
+    @test -z "$(goimports -local "github.com/charleshuang3/authn" -l .)"
 
-# Run go mod tidy on all modules
+# Run go mod tidy
 tidy:
-    @for d in {{module_dirs}}; do \
-        echo "Tidying $d..."; \
-        (cd "$d" && go mod tidy) || exit 1; \
-    done
+    go mod tidy
 
 # Update Go dependencies and tidy
 update-go-deps:
-    @for d in {{module_dirs}}; do \
-        echo "Updating dependencies in $d..."; \
-        (cd "$d" && go get -u -t ./...) || exit 1; \
-    done
+    go get -u -t ./...
     @just tidy
 
 # Update pnpm dependencies (noop for backend-only repository)
@@ -46,15 +37,15 @@ lint: lint-backend
 
 # Run golangci-lint on backend
 lint-backend:
-    golangci-lint run {{module_patterns}}
+    golangci-lint run ./...
 
 # Build backend
 build:
-    mkdir -p build && go build -o build/ {{module_patterns}}
+    mkdir -p build && go build -o build/ ./...
 
 # Test backend
 test:
-    go test -v {{module_patterns}}
+    go test -v ./...
 
 # Build Docker Image
 build-image:

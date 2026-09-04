@@ -10,8 +10,6 @@ env:
   GO_VERSION: 1.27.1
   GOIMPORTS_VERSION: latest
   GOLANGCI_LINT_VERSION: latest
-  NODE_VERSION: 26
-  PNPM_VERSION: 11.3.0
 
 jobs:
   backend:
@@ -23,9 +21,7 @@ jobs:
       uses: actions/setup-go@v7
       with:
         go-version: ${{ env.GO_VERSION }}
-        cache-dependency-path: |
-          go.work.sum
-          **/go.sum
+        cache-dependency-path: go.sum
 
     - name: Download dependencies
       run: go mod download
@@ -37,16 +33,10 @@ jobs:
       run: curl -sSfL https://golangci-lint.run/install.sh | sh -s -- -b $(go env GOPATH)/bin ${{ env.GOLANGCI_LINT_VERSION }}
 
     - name: Format check
-      run: |
-        MODULE_DIRS=$(go list -f '{{.Dir}}' -m)
-        test -z "$($(go env GOPATH)/bin/goimports -local github.com/charleshuang3/authn -l $MODULE_DIRS)"
+      run: test -z "$($(go env GOPATH)/bin/goimports -local github.com/charleshuang3/authn -l .)"
 
     - name: Lint check
-      run: |
-        MODULES=$(go list -f '{{.Dir}}/...' -m)
-        $(go env GOPATH)/bin/golangci-lint run $MODULES
+      run: $(go env GOPATH)/bin/golangci-lint run ./...
 
     - name: Run tests
-      run: |
-        MODULES=$(go list -f '{{.Dir}}/...' -m)
-        go test -v $MODULES
+      run: go test -v ./...
