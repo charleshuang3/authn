@@ -12,12 +12,12 @@ require (
 	github.com/go-co-op/gocron/v2 v2.22.0
 	github.com/goccy/go-yaml v1.19.2
 	github.com/hashicorp/go-set/v3 v3.0.1
-	github.com/lestrrat-go/jwx/v3 v3.2.0
+	github.com/lestrrat-go/jwx/v3 v3.3.0
 	github.com/rs/zerolog v1.35.1
 	github.com/stretchr/testify v1.12.1
-	golang.org/x/crypto v0.56.0
-	golang.org/x/oauth2 v0.36.0
-	gorm.io/driver/postgres v1.6.2
+	golang.org/x/crypto v0.57.0
+	golang.org/x/oauth2 v0.37.0
+	gorm.io/driver/postgres v1.6.3
 	gorm.io/gorm v1.31.2
 )
 
@@ -94,9 +94,9 @@ require (
 	go.yaml.in/yaml/v3 v3.0.5 // indirect
 	golang.org/x/arch v0.30.0 // indirect
 	golang.org/x/net v0.58.0 // indirect
-	golang.org/x/sync v0.22.0 // indirect
-	golang.org/x/sys v0.47.0 // indirect
-	golang.org/x/text v0.41.0 // indirect
+	golang.org/x/sync v0.23.0 // indirect
+	golang.org/x/sys v0.48.0 // indirect
+	golang.org/x/text v0.42.0 // indirect
 	golang.org/x/time v0.15.0 // indirect
 	google.golang.org/api v0.297.0 // indirect
 	google.golang.org/genproto v0.0.0-20260831171406-18b4a7587f8a // indirect
